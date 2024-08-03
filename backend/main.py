@@ -1,6 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from pydub import AudioSegment
 import io
 import asyncio
 
@@ -16,17 +15,22 @@ app.add_middleware(
 )
 
 
+async def process_audio(data):
+    # we will use "pydub" here to process the audio
+    # audio = AudioSegment.from_file(io.BytesIO(data))
+    # Simulate some processing
+    await asyncio.sleep(1)
+    return "Processed audio text"
+
+
 @app.websocket("/process-audio/")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
             data = await websocket.receive_bytes()
-            # Simulate processing the audio chunk
-            # audio = AudioSegment.from_file(io.BytesIO(data))
-            text_stream = "Hello, World!"
-            await websocket.send_text(text_stream)
-            await asyncio.sleep(1)  # Simulate some processing delay
+            text = await process_audio(data)
+            await websocket.send_text(text)
     except WebSocketDisconnect:
         print("Client disconnected")
 
